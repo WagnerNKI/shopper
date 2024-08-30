@@ -1,4 +1,5 @@
-import database from '../database/measures-database'
+import database from '../database/measures-database';
+import isValidBase64Image from '../lib/utils';
 
 export class Measure {
   customer_code: string;
@@ -50,5 +51,17 @@ export class Measure {
       return queryParam.measure_type[0];
 
     return queryParam.measure_type as string;
+  }
+
+  static isInputValid(property: any, valueToValidate: any): boolean {
+    const propertiesValidation = {
+      customer_code: (valueToValidate: any): boolean => { return typeof valueToValidate === 'string' },
+      measure_datetime: (valueToValidate: any): boolean => { return new Date(valueToValidate).toString() === 'Invalid Date' ? false : true },
+      measure_type: (valueToValidate: any): boolean => { return typeof valueToValidate === 'string'},
+      image: (valueToValidate: any): boolean => { return isValidBase64Image(valueToValidate)},
+      confirmed_value: (valueToValidate: any): boolean => { return typeof valueToValidate === 'number' && !isNaN(valueToValidate)},
+      measure_uuid: (valueToValidate: any): boolean => { return typeof valueToValidate === 'string'},
+    };
+    return propertiesValidation[property as keyof typeof propertiesValidation](valueToValidate)
   }
 }

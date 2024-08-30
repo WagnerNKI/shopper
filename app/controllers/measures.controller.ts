@@ -90,6 +90,22 @@ export class MeasureController {
   }
   
   static validateInput = (req: Request, res: Response, next: any) => {
+    
+    const validationError: Array<string> = [];
+
+    Object.keys(req.body).forEach(key => {
+      if (!Measure.isInputValid(key, req.body[key])) {
+        validationError.push(key);
+      }
+    });
+
+    if (validationError.length) {
+      const error = {
+        error_code: "INVALID_DATA",
+        error_description: `Campos ${validationError.join(', ')} `
+      }
+      res.status(400).json(error)
+    }
     next()
   }
 }
