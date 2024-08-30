@@ -1,10 +1,11 @@
 import { Router } from 'express'
+import { MeasureController } from '../controllers/measures.controller';
 
 const router: Router = Router();
 
 router
-  .post('/upload', (req, res) => res.send('uploaded'))
-  .patch('/confirm', (req, res) => res.send('confirmed'))
-  .get('/:customerCode/list', (req, res) => res.send('list'))
-
+  .get('/:customerCode/list', MeasureController.validateInput, MeasureController.listMeasurements)
+  .post('/upload', MeasureController.validateInput, MeasureController.checkMeasurementAndCallGemini)
+  .patch('/confirm', MeasureController.validateInput, MeasureController.confirmAndCorrectMeasurement)
+  
 export default router

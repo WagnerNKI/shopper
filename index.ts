@@ -3,9 +3,7 @@ import router from './app/routes/routes'
 const app = express();
 const PORT = 8080;
 
-app.get('/', (req, res) => {
-  res.send('hello world')
-});
+app.use(express.json())
 
 app.use(router)
 
