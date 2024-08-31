@@ -1,5 +1,6 @@
+import { v4 as uuidv4 } from 'uuid'
 import database from '../database/measures-database';
-import isValidBase64Image from '../lib/utils';
+import utils from '../lib/utils';
 
 export class Measure {
   customer_code: string;
@@ -8,7 +9,7 @@ export class Measure {
   has_confirmed: boolean;
   image_url: string;
   measure_value: number;
-  measure_uuid: string;
+  measure_uuid?: string;
 
   constructor(
     customer_code: string,
@@ -17,7 +18,7 @@ export class Measure {
     has_confirmed: boolean,
     image_url: string,
     measure_value: number,
-    measure_uuid: string
+    measure_uuid?: string
   ) {
     this.customer_code = customer_code;
     this.measure_datetime = measure_datetime;
@@ -25,7 +26,7 @@ export class Measure {
     this.has_confirmed = has_confirmed;
     this.image_url = image_url;
     this.measure_value = measure_value;
-    this.measure_uuid = measure_uuid;
+    this.measure_uuid = measure_uuid || '';
   }
 
   static findByCustomerCodeAndType(customerCode: string, measureType?: string) {
@@ -58,10 +59,27 @@ export class Measure {
       customer_code: (valueToValidate: any): boolean => { return typeof valueToValidate === 'string' },
       measure_datetime: (valueToValidate: any): boolean => { return new Date(valueToValidate).toString() === 'Invalid Date' ? false : true },
       measure_type: (valueToValidate: any): boolean => { return typeof valueToValidate === 'string'},
-      image: (valueToValidate: any): boolean => { return isValidBase64Image(valueToValidate)},
+      image: (valueToValidate: any): boolean => { return utils.isValidBase64Image(valueToValidate)},
       confirmed_value: (valueToValidate: any): boolean => { return typeof valueToValidate === 'number' && !isNaN(valueToValidate)},
       measure_uuid: (valueToValidate: any): boolean => { return typeof valueToValidate === 'string'},
     };
     return propertiesValidation[property as keyof typeof propertiesValidation](valueToValidate)
+  }
+
+  static saveMeasurement(measure: Measure) {
+    measure.measure_uuid = uuidv4() || '';
+    
+    //forcing type assertion because the database lib should be responsible for creating the uuid
+    database.push(measure as {
+      customer_code: string;
+      measure_datetime: Date;
+      measure_type: string;
+      has_confirmed: boolean;
+      image_url: string;
+      measure_value: number;
+      measure_uuid: string;
+    })
+
+    return measure
   }
 }
